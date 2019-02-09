@@ -62,7 +62,7 @@ $ eog result.png
 
 ![](files/people_result.png)
 
-## .prototxt, .caffemodel to .bin, .xml IRmodel for OpenVINO
+## conversion from .prototxt, .caffemodel to .bin, .xml IRmodel for OpenVINO
 
     $ cd models
     $ ln pose_deploy.prototxt pose_iter_440000.prototxt
