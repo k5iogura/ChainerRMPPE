@@ -7,7 +7,14 @@
 
 ![](https://github.com/ZheC/Multi-Person-Pose-Estimation/blob/master/readme/arch.png)
 
-**Network includes Convolutional and Maxpooling layers only.**  
+**Used Layer types**  
+
+   type: "constant"
+   type: "gaussian"
+   type: "Concat"
+   type: "Convolution"
+   type: "Pooling"
+   type: "ReLU"
 
 ### Environment for test
 
