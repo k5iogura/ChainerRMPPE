@@ -3,11 +3,11 @@
 
 [Original REAMDE.md](./README_original.md)
 
-## Network Structure
+## Network Architecture
 
 ![](https://github.com/ZheC/Multi-Person-Pose-Estimation/blob/master/readme/arch.png)
 
-**Used Layer types**  
+**Used caffe Layer types**  
 
     type: "constant"
     type: "gaussian"
