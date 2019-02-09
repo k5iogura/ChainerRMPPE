@@ -3,6 +3,11 @@
 
 [Original REAMDE.md](./README_original.md)
 
+### Environment for test
+
+- python3
+- chainer==5.2.0
+- ubuntu 16.04
 
 ## Download and first move
 ```
