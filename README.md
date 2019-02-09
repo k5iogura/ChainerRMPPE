@@ -41,7 +41,7 @@ $ python3 convert_model.py handnet pose_iter_102000.caffemodel handnet.npz
 $ cd ..
 ```
 
-pose_deploy.prototxt: prototxt carresponding to caffemodel  
+pose_deploy.prototxt: prototxt coresponding to caffemodel  
 pose_iter_440000.caffemodel: trained by Multi Persons pose inference  
 convert_model.py :convert from caffemodel to chainer .npz  
 
