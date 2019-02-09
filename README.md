@@ -43,3 +43,12 @@ $ eog result.png
 ```
 
 ![](files/people_result.png)
+
+## .prototxt, .caffemodel to .bin, .xml IRmodel for OpenVINO
+
+    $ cd model
+    $ ln pose_deploy.prototxt pose_iter_440000.prototxt
+    $ export MO=/opt/intel/computer_vision_sdk/deployment_tools/model_optimizer/
+    $ $MO/mo_caffe.py --input_model pose_iter_440000.caffemodel --output_dir FP16 --data_type FP16 --output Mconv7_stage6_L2,Mconv7_stage6_L1
+    $ ls pose_i*
+      pose_iter_440000.caffemodel  pose_iter_440000.prototxt
