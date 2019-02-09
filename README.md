@@ -9,12 +9,12 @@
 
 **Used Layer types**  
 
-   type: "constant"
-   type: "gaussian"
-   type: "Concat"
-   type: "Convolution"
-   type: "Pooling"
-   type: "ReLU"
+    type: "constant"
+    type: "gaussian"
+    type: "Concat"
+    type: "Convolution"
+    type: "Pooling"
+    type: "ReLU"
 
 ### Environment for test
 
