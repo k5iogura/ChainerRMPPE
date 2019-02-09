@@ -3,6 +3,10 @@
 
 [Original REAMDE.md](./README_original.md)
 
+## Structure
+
+![](https://github.com/ZheC/Multi-Person-Pose-Estimation/blob/master/readme/arch.png)
+
 ### Environment for test
 
 - python3
