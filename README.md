@@ -22,14 +22,18 @@ $ wget https://raw.githubusercontent.com/ZheC/Realtime_Multi-Person_Pose_Estimat
 $ wget http://posefs1.perception.cs.cmu.edu/OpenPose/models/pose/coco/pose_iter_440000.caffemodel
 $ wget http://posefs1.perception.cs.cmu.edu/OpenPose/models/face/pose_iter_116000.caffemodel
 $ wget http://posefs1.perception.cs.cmu.edu/OpenPose/models/hand/pose_iter_102000.caffemodel
-$ python convert_model.py posenet pose_iter_440000.caffemodel coco_posenet.npz
-$ python convert_model.py facenet pose_iter_116000.caffemodel facenet.npz
-$ python convert_model.py handnet pose_iter_102000.caffemodel handnet.npz
+$ python3 convert_model.py posenet pose_iter_440000.caffemodel coco_posenet.npz
+$ python3 convert_model.py facenet pose_iter_116000.caffemodel facenet.npz
+$ python3 convert_model.py handnet pose_iter_102000.caffemodel handnet.npz
 $ cd ..
 ```
+pose_deploy.prototxt: prototxt carresponding to caffemodel
+pose_iter_440000.caffemodel: trained by Multi Persons pose inference
+convert_model.py :convert from caffemodel to chainer .npz
+
 
 ```
-$ python pose_detector.py posenet models/coco_posenet.npz --img data/person.png
+$ python3 pose_detector.py posenet models/coco_posenet.npz --img data/person.png
 $ eog result.png
 ```
 
@@ -38,7 +42,7 @@ $ eog result.png
 and one more,,,
 
 ```
-$ python pose_detector.py posenet models/coco_posenet.npz --img data/people.png
+$ python3 pose_detector.py posenet models/coco_posenet.npz --img data/people.png
 $ eog result.png
 ```
 
@@ -46,7 +50,7 @@ $ eog result.png
 
 ## .prototxt, .caffemodel to .bin, .xml IRmodel for OpenVINO
 
-    $ cd model
+    $ cd models
     $ ln pose_deploy.prototxt pose_iter_440000.prototxt
     $ export MO=/opt/intel/computer_vision_sdk/deployment_tools/model_optimizer/
     $ $MO/mo_caffe.py --input_model pose_iter_440000.caffemodel --output_dir FP16 --data_type FP16 --output Mconv7_stage6_L2,Mconv7_stage6_L1
