@@ -70,3 +70,5 @@ $ eog result.png
     $ $MO/mo_caffe.py --input_model pose_iter_440000.caffemodel --output_dir FP16 --data_type FP16 --output Mconv7_stage6_L2,Mconv7_stage6_L1
     $ ls pose_i*
       pose_iter_440000.caffemodel  pose_iter_440000.prototxt
+    $ ls FP16/
+      pose_iter_440000.bin  pose_iter_440000.mapping  pose_iter_440000.xml
