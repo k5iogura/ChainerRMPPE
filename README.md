@@ -3,9 +3,11 @@
 
 [Original REAMDE.md](./README_original.md)
 
-## Structure
+## Network Structure
 
 ![](https://github.com/ZheC/Multi-Person-Pose-Estimation/blob/master/readme/arch.png)
+
+**Network includes Convolutional and Maxpooling layers only.**  
 
 ### Environment for test
 
