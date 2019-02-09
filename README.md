@@ -8,6 +8,7 @@
 - python3
 - chainer==5.2.0
 - ubuntu 16.04
+- eog
 
 ## Download and first move
 ```
