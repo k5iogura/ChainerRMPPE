@@ -126,7 +126,7 @@ convertion.
       pose_iter_440000.bin  pose_iter_440000.mapping  pose_iter_440000.xml
 ```
 
-#### Investigate OpenVINO inference engine result
+### Investigate OpenVINO inference engine result
 sctipt to try.
 ```
 # IEbase.py
@@ -171,7 +171,7 @@ result of try.
 **layer Mconv7_stage6_L2:**  
   size is ( 1, 19, 46, 46 ) correspoding to **heatmaps** h2s of chainer  
 
-## Conversion from .prototxt, .caffemodel to .bin, .xml IRmodel for OpenVINO
+### Conversion from .prototxt, .caffemodel to .bin, .xml IRmodel for OpenVINO
 
     $ cd models
     $ ln pose_deploy.prototxt pose_iter_440000.prototxt
@@ -205,11 +205,30 @@ Calculate statistics of 2 results by self.statistics().
 
 Result is bellow,
 
+    $ python3 pose_detectorIEbase.py posenet --img data/person.png models/coco_posenet.npz
+    ...
                 stddiv/mean/max/min
     IEbase: H1S   0.0539704   0.0010380   1.0536405  -1.0979681
     chainer:h1s   0.0539323   0.0010327   1.0529298  -1.0975907
     IEbase: H2S   0.2166698   0.0531367   1.0002861  -0.0094703
     chainer:h2s   0.2167076   0.0531342   1.0002861  -0.0092482
+    ...
 
 - Results of chainer and IE are about the same.
 - Both chainer and IE run on CPU, but results are diference a little.
+
+### Execute OpenVINO version pose detector script.
+
+    $ python3 pose_detectorIE.py posenet --img data/people.png --bin models/FP32/pose_iter_440000.bin --xml models/FP32/pose_iter_440000.xml
+    
+    x_data.shape (1, 3, 368, 368) <class 'numpy.ndarray'>
+    IEresult done dict_keys(['Mconv7_stage6_L1', 'Mconv7_stage6_L2'])
+    pafs.shape (38, 320, 320) <class 'tuple'>
+    heatmaps.shape (19, 320, 320) <class 'tuple'>
+    Saving result into result.png...
+
+    $ eog result.png
+
+![](files/IE_people_result.png)
+
+- Results of OpenVINO pose estimation is about the same as chainer
