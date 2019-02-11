@@ -517,8 +517,8 @@ class PoseDetector(object):
         print("chainer:h2s %11.7f %11.7f %11.7f %11.7f"%self.statistics(h2s[-1].data[0]))
         print("len(h1s)",len(h1s),type(h1s))
         print("len(h2s)",len(h2s),type(h2s))
-        print("h1s[-1].shape",h1s[-1].shape,type(h1s))
-        print("h2s[-1].shape",h2s[-1].shape,type(h2s))
+        print("h1s[-1].shape",h1s[-1].shape,type(h1s[-1]))
+        print("h2s[-1].shape",h2s[-1].shape,type(h2s[-1]))
 
         pafs = F.resize_images(h1s[-1], (map_h, map_w)).data[0]
         heatmaps = F.resize_images(h2s[-1], (map_h, map_w)).data[0]

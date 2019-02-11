@@ -61,7 +61,7 @@ if __name__  == '__main__':
     if args.device == "CPU": data_type="FP32"
     assert os.path.exists(args.bin) 
 
-    exec_net, plugin, input_blob, out_blobs = IEsetup(args.xml, args.bin, args.device)
+    exec_net, plugin, input_blob, out_blobs = IEsetup(args.xml, args.bin, args.device, verbose=True)
     del exec_net
     del plugin
 

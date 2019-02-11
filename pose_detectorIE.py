@@ -8,7 +8,7 @@ from scipy.ndimage.filters import gaussian_filter
 from models.IEbase import *
 
 import chainer
-from chainer import cuda, serializers, functions as F
+from chainer import cuda, serializers, functions as F, Variable
 
 from entity import params, JointType
 from models.CocoPoseNet import CocoPoseNet
@@ -16,26 +16,29 @@ from models.CocoPoseNet import CocoPoseNet
 from pdb import *
 
 class PoseDetector(object):
-    def __init__(self, arch=None, weights_file=None, model=None, device=-1, precise=False):
+    def __init__(self, arch, bin_file=None, xml_file=None, device=-1, precise=False):
         self.arch = arch
         self.precise = precise
-        if model is not None:
-            self.model = model
-        else:
-            print('Loading the model...')
-            self.model = params['archs'][arch]()
+        self.IE_bin = bin_file
+        self.IE_xml = xml_file
+    #    if model is not None:
+    #        self.model = model
+    #    else:
+    #        print('Loading the model...')
+    #        self.model = params['archs'][arch]()
+        self.model = params['archs'][arch]()
 
-            if weights_file:
-                serializers.load_npz(weights_file, self.model)
+    #        if weights_file:
+    #            serializers.load_npz(weights_file, self.model)
 
         self.device = device
-        if self.device >= 0:
-            cuda.get_device_from_id(device).use()
-            self.model.to_gpu()
+    #    if self.device >= 0:
+    #        cuda.get_device_from_id(device).use()
+    #        self.model.to_gpu()
 
             # create gaussian filter
-            self.gaussian_kernel = self.create_gaussian_kernel(params['gaussian_sigma'], params['ksize'])[None, None]
-            self.gaussian_kernel = cuda.to_gpu(self.gaussian_kernel)
+    #        self.gaussian_kernel = self.create_gaussian_kernel(params['gaussian_sigma'], params['ksize'])[None, None]
+    #        self.gaussian_kernel = cuda.to_gpu(self.gaussian_kernel)
 
     # compute gaussian filter
     def create_gaussian_kernel(self, sigma=1, ksize=5):
@@ -147,7 +150,7 @@ class PoseDetector(object):
                 ys = np.linspace(joint_a[1], joint_b[1], num=params['n_integ_points'])
                 xs = np.linspace(joint_a[0], joint_b[0], num=params['n_integ_points'])
                 integ_points = np.stack([ys, xs]).T.round().astype('i')  # joint_aとjoint_bの2点間を結ぶ線分上の座標点 [[x1, y1], [x2, y2]...]
-                paf_in_edge = np.hstack([paf[0][np.hsplit(integ_points, 2)], paf[1][np.hsplit(integ_points, 2)]])
+                paf_in_edge = np.hstack([paf[0][tuple(np.hsplit(integ_points, 2))],paf[1][tuple(np.hsplit(integ_points, 2))]])
                 unit_vector = vector / norm
                 inner_products = np.dot(paf_in_edge, unit_vector)
 
@@ -504,21 +507,16 @@ class PoseDetector(object):
             x_data = cuda.to_gpu(x_data)
 
         print("x_data.shape",x_data.shape,type(x_data))
-        resS     = IEresult("models/FP32/pose_iter_440000.xml", "models/FP32/pose_iter_440000.bin","CPU",x_data)
+     #   IE_bin = "models/FP32/pose_iter_440000.bin"
+     #   IE_xml = "models/FP32/pose_iter_440000.xml"
+        resS = IEresult(self.IE_xml, self.IE_bin,"CPU",x_data)
         print("IEresult done",resS.keys())
+
         for k in resS.keys():
             if resS[k].shape[1]==38: H1S=resS[k]
             if resS[k].shape[1]==19: H2S=resS[k]
-        print("            stddiv/mean/max/min")
-        h1s, h2s = self.model(x_data)
-        print("IEbase: H1S %11.7f %11.7f %11.7f %11.7f"%self.statistics(H1S))
-        print("chainer:h1s %11.7f %11.7f %11.7f %11.7f"%self.statistics(h1s[-1].data[0]))
-        print("IEbase: H2S %11.7f %11.7f %11.7f %11.7f"%self.statistics(H2S))
-        print("chainer:h2s %11.7f %11.7f %11.7f %11.7f"%self.statistics(h2s[-1].data[0]))
-        print("len(h1s)",len(h1s),type(h1s))
-        print("len(h2s)",len(h2s),type(h2s))
-        print("h1s[-1].shape",h1s[-1].shape,type(h1s))
-        print("h2s[-1].shape",h2s[-1].shape,type(h2s))
+        h1s = [ Variable(H1S) ]
+        h2s = [ Variable(H2S) ]
 
         pafs = F.resize_images(h1s[-1], (map_h, map_w)).data[0]
         heatmaps = F.resize_images(h2s[-1], (map_h, map_w)).data[0]
@@ -579,7 +577,8 @@ def draw_person_pose(orig_img, poses):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Pose detector')
     parser.add_argument('arch', choices=params['archs'].keys(), default='posenet', help='Model architecture')
-    parser.add_argument('weights', help='weights file path')
+    parser.add_argument('--bin', '-b', required=True, help='model file .bin path')
+    parser.add_argument('--xml', '-x', required=True, help='model file .xml path')
     parser.add_argument('--img', '-i', default=None, help='image file path')
     parser.add_argument('--gpu', '-g', type=int, default=-1, help='GPU ID (negative value indicates CPU)')
     parser.add_argument('--precise', action='store_true', help='do precise inference')
@@ -589,7 +588,7 @@ if __name__ == '__main__':
     chainer.config.train = False
 
     # load model
-    pose_detector = PoseDetector(args.arch, args.weights, device=args.gpu, precise=args.precise)
+    pose_detector = PoseDetector(args.arch, args.bin, args.xml, device=args.gpu, precise=args.precise)
 
     # read image
     img = cv2.imread(args.img)
