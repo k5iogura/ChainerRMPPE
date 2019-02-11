@@ -9,9 +9,6 @@
 
 **Used caffe Layer types**  
 
-    type: "constant"
-    type: "gaussian"
-    type: "Concat"
     type: "Convolution"
     type: "Pooling"
     type: "ReLU"
@@ -107,8 +104,8 @@ So,
 **input layer size is ( 1,3,368,368 )**  
 **output layer size heatmaps( 19,320,320 ) and pafs( 19*2,320,320 )**  
 
-- **h1s means pafs**
-- **h2s means heatmaps**
+- **h1s means pafs    (1,38,320,320)**
+- **h2s means heatmaps(1,19,320,320)**
 - **19 parts of human keypoints may be represented.**
 - **320 x 320 spacial dimention may be represented.**
 - **320 = 46 x 8 upsampling result.**
@@ -170,11 +167,11 @@ result of try.
 ```
 
 **layer Mconv7_stage6_L1:**  
-  size is ( 1, 38, 46, 46 ) correspoding to pafs h1s  
+  size is ( 1, 38, 46, 46 ) correspoding to **pafs** h1s of chainer  
 **layer Mconv7_stage6_L2:**  
-  size is ( 1, 19, 46, 46 ) correspoding to heatmaps h2s  
+  size is ( 1, 19, 46, 46 ) correspoding to **heatmaps** h2s of chainer  
 
-## conversion from .prototxt, .caffemodel to .bin, .xml IRmodel for OpenVINO
+## Conversion from .prototxt, .caffemodel to .bin, .xml IRmodel for OpenVINO
 
     $ cd models
     $ ln pose_deploy.prototxt pose_iter_440000.prototxt
@@ -184,3 +181,35 @@ result of try.
       pose_iter_440000.caffemodel  pose_iter_440000.prototxt
     $ ls FP16/
       pose_iter_440000.bin  pose_iter_440000.mapping  pose_iter_440000.xml
+
+### Comparison 2 results of chainer and IE
+
+Use python script "pose_detectorIEbase.py".  
+Run self.model() for chainer and IEinfer() for OpenVINO.  
+Calculate statistics of 2 results by self.statistics().
+
+    ....
+    resS = IEresult("models/FP32/pose_iter_440000.xml", 
+                    "models/FP32/pose_iter_440000.bin","CPU",x_data)
+    h1s, h2s = self.model(x_data)
+            for k in resS.keys():
+            if resS[k].shape[1]==38: H1S=resS[k]
+            if resS[k].shape[1]==19: H2S=resS[k]
+    print("            stddiv/mean/max/min")
+    h1s, h2s = self.model(x_data)
+    print("IEbase: H1S %11.7f %11.7f %11.7f %11.7f"%self.statistics(H1S))
+    print("chainer:h1s %11.7f %11.7f %11.7f %11.7f"%self.statistics(h1s[-1].data[0]))
+    print("IEbase: H2S %11.7f %11.7f %11.7f %11.7f"%self.statistics(H2S))
+    print("chainer:h2s %11.7f %11.7f %11.7f %11.7f"%self.statistics(h2s[-1].data[0]))
+    ....
+
+Result is bellow,
+
+                stddiv/mean/max/min
+    IEbase: H1S   0.0539704   0.0010380   1.0536405  -1.0979681
+    chainer:h1s   0.0539323   0.0010327   1.0529298  -1.0975907
+    IEbase: H2S   0.2166698   0.0531367   1.0002861  -0.0094703
+    chainer:h2s   0.2167076   0.0531342   1.0002861  -0.0092482
+
+- Results of chainer and IE are about the same.
+- Both chainer and IE run on CPU, but results are diference a little.
