@@ -484,6 +484,10 @@ class PoseDetector(object):
         scores = subsets[:, -2]
         return poses, scores
 
+    def statistics(self,ndarray):
+        ndarray_ = ndarray.reshape(-1)
+        return np.std(ndarray_), np.mean(ndarray_), np.max(ndarray_), np.min(ndarray_)
+
     def __call__(self, orig_img):
         orig_img = orig_img.copy()
         if self.precise:
@@ -505,12 +509,12 @@ class PoseDetector(object):
         for k in resS.keys():
             if resS[k].shape[1]==38: H1S=resS[k]
             if resS[k].shape[1]==19: H2S=resS[k]
+        print("            stddiv/mean/max/min")
         h1s, h2s = self.model(x_data)
-        for i in range(np.prod(h1s[-1].shape)):
-            h1s_ = h1s[-1].data[0].reshape(-1)
-            H1S_ = H1S.reshape(-1)
-            if h1s_[i] != H1S_[i]:
-                print("%.3f %.3f"%(h1s_[i], H1S_[i]))
+        print("IEbase: H1S %11.7f %11.7f %11.7f %11.7f"%self.statistics(H1S))
+        print("chainer:h1s %11.7f %11.7f %11.7f %11.7f"%self.statistics(h1s[-1].data[0]))
+        print("IEbase: H2S %11.7f %11.7f %11.7f %11.7f"%self.statistics(H2S))
+        print("chainer:h2s %11.7f %11.7f %11.7f %11.7f"%self.statistics(h2s[-1].data[0]))
         print("len(h1s)",len(h1s),type(h1s))
         print("len(h2s)",len(h2s),type(h2s))
         print("h1s[-1].shape",h1s[-1].shape,type(h1s))
