@@ -7,7 +7,7 @@ import cv2
 import argparse
 from openvino.inference_engine import IENetwork, IEPlugin
 
-def IEsetup(model_xml, model_bin, device):
+def IEsetup(model_xml, model_bin, device, verbose=False):
     start =time()
     plugin = IEPlugin(device=device, plugin_dirs=None)
     libcpu = "inference_engine_samples/intel64/Release/lib/libcpu_extension.so"
@@ -15,23 +15,23 @@ def IEsetup(model_xml, model_bin, device):
     if device == "CPU":plugin.add_cpu_extension(libcpu)
     net = IENetwork(model=model_xml, weights=model_bin)
 
-    print("* IEsetup", model_bin, "on", device)
+    if verbose:print("* IEsetup", model_bin, "on", device)
     exec_net = plugin.load(network=net, num_requests=1)
 
     input_blob = next(iter(net.inputs))  #input_blob = 'data'
     model_n, model_c, model_h, model_w = net.inputs[input_blob].shape
-    print("network in shape n/c/h/w (from xml)= %d %d %d %d"%(model_n, model_c, model_h, model_w))
-    print("input_blob =",input_blob)
+    if verbose:print("network in shape n/c/h/w (from xml)= %d %d %d %d"%(model_n, model_c, model_h, model_w))
+    if verbose:print("input_blob =",input_blob)
     out_blobs = []
     for out_blob in net.outputs:
-        print("  net.outputs[",out_blob,"].shape",net.outputs[out_blob].shape)
+        if verbose:print("  net.outputs[",out_blob,"].shape",net.outputs[out_blob].shape)
         out_blobs.append(out_blob)
-    print("* IEsetup done %.2fmsec"%(1000.*(time()-start)))
+    if verbose:print("* IEsetup done %.2fmsec"%(1000.*(time()-start)))
     del net
     return exec_net, plugin, input_blob, out_blobs
 
-def IEinfer(exec_net, in_frame, input_blob, out_blobs):
-    print("* IEinfer")
+def IEinfer(exec_net, in_frame, input_blob, out_blobs, verbose=False):
+    if verbose:print("* IEinfer")
     start = time()
     exec_net.start_async(request_id=0, inputs={input_blob: in_frame})
     result = {}
@@ -41,7 +41,7 @@ def IEinfer(exec_net, in_frame, input_blob, out_blobs):
             result[out_blob] = exec_net.requests[0].outputs[out_blob]
     else:
         print("error")
-    print("* IEinfer done %.2fmsec"%(1000.*(time()-start)))
+    if verbose:print("* IEinfer done %.2fmsec"%(1000.*(time()-start)))
     return result
 
 def IEresult(_xml, _bin, _device, in_frame):
