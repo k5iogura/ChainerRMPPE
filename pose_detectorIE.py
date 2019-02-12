@@ -16,11 +16,12 @@ from models.CocoPoseNet import CocoPoseNet
 from pdb import *
 
 class PoseDetector(object):
-    def __init__(self, arch, bin_file=None, xml_file=None, device=-1, precise=False):
+    def __init__(self, arch, bin_file=None, xml_file=None, device=None, precise=False):
         self.arch = arch
         self.precise = precise
         self.IE_bin = bin_file
         self.IE_xml = xml_file
+        self.device = device
     #    if model is not None:
     #        self.model = model
     #    else:
@@ -31,7 +32,6 @@ class PoseDetector(object):
     #        if weights_file:
     #            serializers.load_npz(weights_file, self.model)
 
-        self.device = device
     #    if self.device >= 0:
     #        cuda.get_device_from_id(device).use()
     #        self.model.to_gpu()
@@ -503,13 +503,15 @@ class PoseDetector(object):
         resized_image = cv2.resize(orig_img, (input_w, input_h))
         x_data = self.preprocess(resized_image)
 
-        if self.device >= 0:
-            x_data = cuda.to_gpu(x_data)
+     #   if self.device >= 0:
+     #       x_data = cuda.to_gpu(x_data)
 
         print("x_data.shape",x_data.shape,type(x_data))
      #   IE_bin = "models/FP32/pose_iter_440000.bin"
      #   IE_xml = "models/FP32/pose_iter_440000.xml"
-        resS = IEresult(self.IE_xml, self.IE_bin,"CPU",x_data)
+        if self.device == 'CPU'   : data_type='FP32'
+        if self.device == 'MYRIAD': data_type='FP16'
+        resS = IEresult(self.IE_xml, self.IE_bin, self.device, x_data)
         print("IEresult done",resS.keys())
 
         for k in resS.keys():
@@ -523,9 +525,9 @@ class PoseDetector(object):
         print("pafs.shape",pafs.shape,type(pafs.shape))
         print("heatmaps.shape",heatmaps.shape,type(heatmaps.shape))
 
-        if self.device >= 0:
-            pafs = pafs.get()
-            cuda.get_device_from_id(self.device).synchronize()
+     #   if self.device >= 0:
+     #       pafs = pafs.get()
+     #       cuda.get_device_from_id(self.device).synchronize()
 
         all_peaks = self.compute_peaks_from_heatmaps(heatmaps)
         if len(all_peaks) == 0:
@@ -580,7 +582,7 @@ if __name__ == '__main__':
     parser.add_argument('--bin', '-b', required=True, help='model file .bin path')
     parser.add_argument('--xml', '-x', required=True, help='model file .xml path')
     parser.add_argument('--img', '-i', default=None, help='image file path')
-    parser.add_argument('--gpu', '-g', type=int, default=-1, help='GPU ID (negative value indicates CPU)')
+    parser.add_argument('--device', '-d', type=str, default="CPU", help='CPU/MYRIAD')
     parser.add_argument('--precise', action='store_true', help='do precise inference')
     args = parser.parse_args()
 
@@ -588,7 +590,7 @@ if __name__ == '__main__':
     chainer.config.train = False
 
     # load model
-    pose_detector = PoseDetector(args.arch, args.bin, args.xml, device=args.gpu, precise=args.precise)
+    pose_detector = PoseDetector(args.arch, args.bin, args.xml, device=args.device, precise=args.precise)
 
     # read image
     img = cv2.imread(args.img)
