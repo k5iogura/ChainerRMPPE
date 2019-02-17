@@ -1,9 +1,6 @@
-
-# Under construction
-
 [Original REAMDE.md](./README_original.md)
 
-## Network Architecture
+## Released Network Architecture
 
 ![](https://github.com/ZheC/Multi-Person-Pose-Estimation/blob/master/readme/arch.png)
 
